@@ -14,12 +14,14 @@ var thestuff = (1..9).collect({arg i; i*i});
 })
 )
 
+// and here it is, but now it works
+// note that the premise is that the Nyquist maps to 0, so the Nyquist and its sub-octaves are the axes in "pc-space"
 (
 {
-	var sound, chain, balance;
+	var sound, chain, balance, fftsize;
 	sound = SoundIn.ar(0);
 	//sound = Pulse.ar(MouseX.kr(40,4000));
-	chain = FFT(LocalBuf(1024), sound);
+	chain = FFT(LocalBuf(1024), sound); // hardcoded FFT size :/
 	chain = chain.pvcalc(1024, {
 		arg mags, phases;
 		var newmags, newphases;
@@ -42,3 +44,57 @@ var thestuff = (1..9).collect({arg i; i*i});
 	IFFT(chain).dup
 }.play;
 )
+
+// likewise, here's an attempt at forcing everything into the same octave with filters. It likewise productively only kinda works.
+/* we have a bank of filters for following ranges:
+9: 21-43
+8: 43-86
+7: 86-172
+6: 172-344
+5: 344-689
+4: 689-1378
+3: 1378-2756
+2: 2756-5512
+1: 5512-11025
+0: 11025-22050
+
+each of these gets pushed into the same octave with a pitchshift somehow
+
+number: Nyquist_2^what? for upper value*/
+
+344.cpsmidi // F4 26c flat, as expected
+
+/* rq = 1/q = spread / center
+for each of these, if f is lower freq, then spread = f, center = (3f)/2, so rq = 3/2
+*/
+
+{BPF.ar(WhiteNoise.ar, MouseX.kr(21,11000), 3/2)}.play
+
+(
+{
+	var sound, filterbank, pitchshifts, target;
+	sound = LFSaw.ar(MouseX.kr(20,1000), 0.001); // or whatever
+	// sound = SinOsc.ar(22050/32);
+	target = 3; // how many octaves below Nyquist to target
+	filterbank = Array.fill(10);
+	10.do{
+		arg i;
+		filterbank[i] = BPF.ar(sound, 3*22050/(2**(i+2)), 3/2);
+	};
+	filterbank[0] = SinOsc.ar(0); // highest one is noise-ridden
+	pitchshifts = Array.fill(10);
+	10.do{
+		arg i;
+		pitchshifts[i] = PitchShift.ar(
+			filterbank[i],
+			0.01,
+			(0.5)**(target-i)
+		);
+	};
+	Mix.ar(pitchshifts).dup
+	//sound = filterbank[5];
+}.play
+)
+
+
+{PitchShift.ar(SinOsc.ar(MouseX.kr(20,1000), 0.01, 0.5))}.play
