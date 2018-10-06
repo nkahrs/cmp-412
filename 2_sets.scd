@@ -97,4 +97,51 @@ for each of these, if f is lower freq, then spread = f, center = (3f)/2, so rq =
 )
 
 
-{PitchShift.ar(SinOsc.ar(MouseX.kr(20,1000), 0.01, 0.5))}.play
+// now, the other two.
+
+// FFT-based compression into one octave
+
+// first, pick 0 through 9 as how much down from Nyquist to find minimum bin
+2**(9-(0..9))
+// anyways, for, say, 128-256, we look at bin/2 (if an integer), etc, and bin*2, etc
+(
+{
+	var sound, chain, balance, fftsize;
+	sound = SinOsc.ar(MouseX.kr(20, 1000));
+	// sound = SoundIn.ar;
+	//sound = Pulse.ar(MouseX.kr(40,4000));
+	chain = FFT(LocalBuf(1024), sound); // hardcoded FFT size :/
+	chain = chain.pvcalc(1024, {
+		arg mags, phases;
+		var newmags, newphases;
+		newmags = Array.fill(mags.size, 0);
+		newphases = phases;
+		(8..16).do{ // this will change along with 5 and 3 below depending on which octave
+			arg i;
+			newmags[i] = mags[i];
+			4.do{
+				arg j;
+				newmags[i] = newmags[i] + mags[i*(2**(j+1))];
+			};
+			4.do{ // sub-octaves still aren't quite working...
+				arg j;
+				var foo = (i/(2**(j+1)));
+				newmags[i] = newmags[i] + (mags[foo] * (2**j));
+			};
+		};
+		[newmags, phases]
+	});
+	balance = MouseY.kr(0,1);
+	//(sound * (1 - balance)) + (IFFT(chain) * balance)
+	IFFT(chain).dup
+}.play;
+)
+
+4.do{arg j; (19/(2**(j+1))).floor.postln}
+
+// filterbanks for flipping pitch-classes (F->F, or whole spectrum?)
+// is it possible to have, like, 12 bandpass filters simultaneously alternating in each of 10 octaves? No, 120 is more than it can handle. I'll have to break it into pc-pairs
+// let F-slightly-flat = 0. We have 0, 1, 2, 3, 4, 5.
+/* actually the more I think about this the more pointless it is--dividing into semitones with filters is completely ridiculous. And because the whole point of this is octaves and more general flipping it imposes boundaries that don't make sense.
+
+So, I instead need to get the 3 things above working in sequence.
