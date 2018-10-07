@@ -20,7 +20,7 @@ var thestuff = (1..9).collect({arg i; i*i});
 {
 	var sound, chain, balance, fftsize;
 	sound = SoundIn.ar(0);
-	//sound = Pulse.ar(MouseX.kr(40,4000));
+	sound = SinOsc.ar(MouseX.kr(40,4000));
 	chain = FFT(LocalBuf(1024), sound); // hardcoded FFT size :/
 	chain = chain.pvcalc(1024, {
 		arg mags, phases;
@@ -145,3 +145,53 @@ for each of these, if f is lower freq, then spread = f, center = (3f)/2, so rq =
 /* actually the more I think about this the more pointless it is--dividing into semitones with filters is completely ridiculous. And because the whole point of this is octaves and more general flipping it imposes boundaries that don't make sense.
 
 So, I instead need to get the 3 things above working in sequence.
+
+*/
+
+// one more thing: spectral analysis/resynthesis. The analysis happened elsewhere (in SPEAR), he's the resynthesis.
+(
+var freqs, foo, f0, dur;
+
+freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
+foo = freqs.size;
+f0 = freqs[0];
+dur = 1;
+foo.do{
+	arg i;
+	{var sound, env;
+		sound = SinOsc.ar(freqs[i]) * (f0 / freqs[i] / foo);
+		env = EnvGen.ar(Env(times:[0.01, dur*f0/freqs[i]]), doneAction:2);
+		sound*env
+	}.play
+};
+)
+
+// some test runs of: compressing into an octave
+
+(
+var shiftoct, freqs, newfreqs, whichoct, max, min;
+
+shiftoct = { // function to octave-shift a frequency until between maxs and mins
+	arg freq, max, min;
+	if((freq > max), // test
+		{shiftoct.value(freq / 2, max, min)}, // then
+		// else
+		{if((freq > min),
+			{freq},
+			{shiftoct.value(freq * 2, max, min)}
+	)}
+	)
+};
+
+freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
+whichoct = 6; // 0 is just below Nyquist, higher is lower
+max = 22050/(2**whichoct);
+min = max/2;
+newfreqs = Array.fill(freqs.size, {
+	arg i; // new array: for each item in array, octave-shift until between min and max
+	shiftoct.value(freqs[i], max, min);
+}
+);
+);
+
+"hi".postln
