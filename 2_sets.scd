@@ -74,8 +74,9 @@ for each of these, if f is lower freq, then spread = f, center = (3f)/2, so rq =
 {
 	var sound, filterbank, pitchshifts, target;
 	sound = LFSaw.ar(MouseX.kr(20,1000), 0.001); // or whatever
+	sound = SoundIn.ar(0);
 	// sound = SinOsc.ar(22050/32);
-	target = 3; // how many octaves below Nyquist to target
+	target = 5; // how many octaves below Nyquist to target
 	filterbank = Array.fill(10);
 	10.do{
 		arg i;
@@ -161,11 +162,15 @@ dur = 2;
 amps = Array.fill(foo, {arg i; f0 / freqs[i] / foo});
 durs = Array.fill(foo, {arg i; dur * ((f0 / freqs[i])**0.5)});
 
+// if I want to mess around...
+// amps = amps.reverse;
+// durs = durs.reverse;
+
 // freqs from below, to push all into an octave
 // freqs= [ 231.5, 288.125, 312.375, 330.625, 202.4375, 240.9375, 263.75, 292.25, 297.3125, 185.28125, 187.34375, 189.96875, 192.28125, 194.5625, 226.21875 ]*2;
 
 // freqs from further below to invert about 2000Hz
-// freqs = [ 512.75067916442, 205.99007761659, 189.99885110294, 179.51120185491, 146.59065418532, 123.1665704037, 112.51353765551, 101.5413021613, 99.812303743168, 80.082160382231, 79.200521919308, 78.106124182637, 77.166768877986, 76.26198665375, 65.590154566411 ];
+// freqs = [ 512.75067916442, 205.99007761659, 189.99885110294, 179.51120185491, 146.59065418532, 123.1665704037, 112.51353765551, 101.5413021613, 99.812303743168, 80.082160382231, 79.200521919308, 78.106124182637, 77.166768877986, 76.26198665375, 65.590154566411 ] * 8;
 
 foo.do{
 	arg i;
