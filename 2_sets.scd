@@ -150,17 +150,29 @@ So, I instead need to get the 3 things above working in sequence.
 
 // one more thing: spectral analysis/resynthesis. The analysis happened elsewhere (in SPEAR), he's the resynthesis.
 (
-var freqs, foo, f0, dur;
+var freqs, foo, f0, dur, amps, durs;
 
 freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
 foo = freqs.size;
 f0 = freqs[0];
 dur = 1;
+
+// calculate amps and durs now for potential reuse
+amps = Array.fill(foo, {arg i; f0 / freqs[i] / foo});
+durs = Array.fill(foo, {arg i; dur * ((f0 / freqs[i])**0.5)});
+
+// freqs from below, to push all into an octave
+// freqs= [ 231.5, 288.125, 312.375, 330.625, 202.4375, 240.9375, 263.75, 292.25, 297.3125, 185.28125, 187.34375, 189.96875, 192.28125, 194.5625, 226.21875 ]*2;
+
+// freqs from further below to invert about 2000Hz
+// freqs = [ 4319.6544276458, 1735.3579175705, 1600.6402561024, 1512.2873345936, 1234.9490583513, 1037.6134889754, 947.8672985782, 855.43199315654, 840.86609207484, 674.65002529938, 667.22268557131, 658.00296101332, 650.08938729075, 642.46707356248, 552.56250863379 ];
+
+
 foo.do{
 	arg i;
 	{var sound, env;
-		sound = SinOsc.ar(freqs[i]) * (f0 / freqs[i] / foo);
-		env = EnvGen.ar(Env(times:[0.01, dur*f0/freqs[i]]), doneAction:2);
+		sound = SinOsc.ar(freqs[i]) * amps[i];
+		env = EnvGen.ar(Env(times:[0.01, durs[i]]), doneAction:2);
 		sound*env
 	}.play
 };
@@ -182,6 +194,7 @@ shiftoct = { // function to octave-shift a frequency until between maxs and mins
 	)}
 	)
 };
+// nb this crashes if given freq=0
 
 freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
 whichoct = 6; // 0 is just below Nyquist, higher is lower
@@ -192,6 +205,15 @@ newfreqs = Array.fill(freqs.size, {
 	shiftoct.value(freqs[i], max, min);
 }
 );
-);
+)
 
-"hi".postln
+// and pitch inversion around a given axis
+
+(
+var axis, axissquared, freqs, newfreqs;
+
+axis = 2000;
+axissquared = axis * axis;
+freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
+newfreqs = freqs.collect({arg i; axissquared/i});
+)
