@@ -74,8 +74,6 @@ for each of these, if f is lower freq, then spread = f, center = (3f)/2, so rq =
 {
 	var sound, filterbank, pitchshifts, target;
 	sound = LFSaw.ar(MouseX.kr(20,1000), 0.001); // or whatever
-	sound = SoundIn.ar(0);
-	// sound = SinOsc.ar(22050/32);
 	target = 5; // how many octaves below Nyquist to target
 	filterbank = Array.fill(10);
 	10.do{
@@ -222,3 +220,37 @@ axissquared = axishi * axislo;
 freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
 newfreqs = freqs.collect({arg i; axissquared/i});
 )
+
+
+// actually play the sample
+
+~thebuf = Buffer.read(s, "/Volumes/snd/users/nkahrs/2 Fall 2018/cmp-412.git/trunk/10 06 brake drum single hit mono.wav")
+~thebuf
+(
+{
+	var pitch, time, pitchshift;
+	pitch = 1/8; // pitch ratio
+	time = 1/8; // time ratio
+	// play rate = time shift
+	// pitch shift = pitch / time. Only kinda works, but for this that's fine.
+	pitchshift = pitch/time;
+	LPF.ar(
+		PitchShift.ar(PlayBuf.ar(1, ~thebuf,time, doneAction:2), 0.05, pitchshift),
+		min(7500*pitch, 22050))
+	.dup
+}.play
+)
+
+
+/* to do: modularize each component.
+Need synths for:
+FFT inversion
+File playback
+FFT octave compression (just hardcode it, each octave). Maybe ignore this if it just sounds bad.
+
+Need functional shorthands for:
+filter octave compression
+additive resynthesis for any combo of transposition, inversion, octave compression
+
+see 2_sets_synthdefsfunctions for that
+*/
