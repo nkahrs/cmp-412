@@ -155,7 +155,7 @@ var freqs, foo, f0, dur, amps, durs;
 freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
 foo = freqs.size;
 f0 = freqs[0];
-dur = 1;
+dur = 2;
 
 // calculate amps and durs now for potential reuse
 amps = Array.fill(foo, {arg i; f0 / freqs[i] / foo});
@@ -165,8 +165,7 @@ durs = Array.fill(foo, {arg i; dur * ((f0 / freqs[i])**0.5)});
 // freqs= [ 231.5, 288.125, 312.375, 330.625, 202.4375, 240.9375, 263.75, 292.25, 297.3125, 185.28125, 187.34375, 189.96875, 192.28125, 194.5625, 226.21875 ]*2;
 
 // freqs from further below to invert about 2000Hz
-// freqs = [ 4319.6544276458, 1735.3579175705, 1600.6402561024, 1512.2873345936, 1234.9490583513, 1037.6134889754, 947.8672985782, 855.43199315654, 840.86609207484, 674.65002529938, 667.22268557131, 658.00296101332, 650.08938729075, 642.46707356248, 552.56250863379 ];
-
+// freqs = [ 512.75067916442, 205.99007761659, 189.99885110294, 179.51120185491, 146.59065418532, 123.1665704037, 112.51353765551, 101.5413021613, 99.812303743168, 80.082160382231, 79.200521919308, 78.106124182637, 77.166768877986, 76.26198665375, 65.590154566411 ];
 
 foo.do{
 	arg i;
@@ -207,13 +206,14 @@ newfreqs = Array.fill(freqs.size, {
 );
 )
 
-// and pitch inversion around a given axis
+// and pitch inversion around a given two-pitch axis
 
 (
-var axis, axissquared, freqs, newfreqs;
+var axislo, axishi, axissquared, freqs, newfreqs;
 
-axis = 2000;
-axissquared = axis * axis;
+axishi = 22050;
+axislo = 22050/1024;
+axissquared = axishi * axislo;
 freqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
 newfreqs = freqs.collect({arg i; axissquared/i});
 )
