@@ -110,6 +110,7 @@ SynthDef(\bdPT, {
 	amps = Array.fill(foo, {arg i; f0 / freqs[i] / foo});
 	durs = Array.fill(foo, {arg i; dur * ((f0 / freqs[i])**0.5)});
 
+	// I should add a way to reverse either of these
 
 	if(invert==true, {freqs = ~inverts.value(freqs)});
 	if(octave.isNumber, {
@@ -144,4 +145,8 @@ Synth(\bdPT, [\pitch, 1, \time, 1, \mul, 10, \outBus, ~bus])
 ~inOct.value(8, ~bus)
 // to just play from bus
 {In.ar(~bus)}.play
-~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 1, true, 3, 1, ~bus, 1)
+~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 5, true, nil, 1, ~bus, 1)
+
+
+// functionality I need to add: reverse envelopes!
+// have ~additive pass back the three arrays?

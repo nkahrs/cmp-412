@@ -254,3 +254,32 @@ additive resynthesis for any combo of transposition, inversion, octave compressi
 
 see 2_sets_synthdefsfunctions for that
 */
+
+
+/*
+10/8 todo: outline piece
+needs to be at least a minute
+
+15 seconds: first just time-shifting and FFT inversion, then a bit of "octave"-shifting
+10 seconds: introduce additive resynthesis via reverse envelope
+10 seconds: use normal envelope, big inversion, and pitch-transposition
+
+10 seconds: move to pitch classes: suddenly compress resynth into an octave
+10 seconds: introduce the filterbank as a parallel! Do the same thing with filterbank/samples and pcs compressed into an octave
+15 seconds: inversion in combo with filters, versus both increasingly stretched original and a resynth
+
+
+Durations: cycle through something proportional to the peak frequencies
+Panning: just alternate hard left/right
+
+
+Preliminary Title: Infared Mosquito
+Preliminary Program Note:
+
+The two fundamental operations of atonal theory are transposition preserving duration, and inversion preserving timbre. These both present fundamental problems in electronic music---when dealing with waveforms, transposition involves changing speed, and inversion is almost nonsensical due to the absence of an abstract axis. Likewise, octave equivalence is also critical, yet is unrecognized by waveforms.
+
+This piece drags the atonal notions of octave equivalence (a special case of transposition) and inversion into the domain of spectra, and examines their resistance. I begin with a brake drum sound (a hint to Jasmine Thomasian), which is promply both transposed without time adjustment and stretched without transposition---both introducing artefacts--and then "inverted" in that its FFT is flipped upside-down with inherently imprecise logarithmic scaling. I then match these sounds with their more familiar atonal counterparts treating the brake drum only as a set of sinusoids. I then compress these sounds into individual octaves---a familiar atonal operation when one looks for a normal order---both via filters and via direct manipulation of frequencies, and conclude by using all of these operations in combination, trying to get the same result multiple ways but instead only hearing how it goes wrong.
+
+The title refers to flipping frequencies from FFT bin 512 to 1: the mosquito (above the upper frequency limit of our hearing) becomes infared (below the lower limit).
+
+*/
