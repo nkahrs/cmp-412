@@ -260,13 +260,14 @@ see 2_sets_synthdefsfunctions for that
 10/8 todo: outline piece
 needs to be at least a minute
 
-15 seconds: first just time-shifting and FFT inversion, then a bit of "octave"-shifting
+15 seconds: first just time-shifting and FFT inversion, then a bit of "octave"-shifting (about 5 sec of each)
 10 seconds: introduce additive resynthesis via reverse envelope
 10 seconds: use normal envelope, big inversion, and pitch-transposition
 
 10 seconds: move to pitch classes: suddenly compress resynth into an octave
 10 seconds: introduce the filterbank as a parallel! Do the same thing with filterbank/samples and pcs compressed into an octave
 15 seconds: inversion in combo with filters, versus both increasingly stretched original and a resynth
+final closing gesture: additive synth adding notes one at a time, and slowly crossfading to FFT inversion (switching panning meanwhile). Do by sending to two buses (left/right processing), which go to four buses (left/right plain, right/left fft'd), and crossfade stuff in those buses
 
 
 Durations: cycle through something proportional to the peak frequencies
@@ -283,3 +284,8 @@ This piece drags the atonal notions of octave equivalence (a special case of tra
 The title refers to flipping frequencies from FFT bin 512 to 1: the mosquito (above the upper frequency limit of our hearing) becomes infared (below the lower limit).
 
 */
+
+
+// making a duration scheme
+2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]
+~foo = Pseq(2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], inf).asStream;

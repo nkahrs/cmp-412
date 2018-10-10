@@ -27,7 +27,7 @@ SynthDef(\fftInv, {
 	Out.ar(outBus, IFFT(chain))
 }).load(s);
 
-~thebuf = Buffer.read(s, "/Volumes/snd/users/nkahrs/2 Fall 2018/cmp-412.git/trunk/10 06 brake drum single hit mono.wav");
+~thebuf = Buffer.read(s, "C:/Users/nkahrs/Box Sync/Noah Kahrs/1b Autumn 2018/composition/Bob's Class/10 06 brake drum single hit mono.wav"); //"/Volumes/snd/users/nkahrs/2 Fall 2018/cmp-412.git/trunk/10 06 brake drum single hit mono.wav"); use after-comment bit on Wozzeck
 SynthDef(\bdPT, {
 	arg pitch, time, mul, outBus; // ratios of pitch and time, gain as multiplier, bus to sendo ut
 	var pitchshift;
@@ -133,6 +133,8 @@ SynthDef(\bdPT, {
 			Out.ar(outBus, mul*sound*env);
 		}.play
 	};
+
+	[foo, freqs, amps, durs]
 };
 )
 
@@ -141,11 +143,11 @@ SynthDef(\bdPT, {
 ~bus = Bus.audio(s);
 {Out.ar(~bus, SinOsc.ar(MouseX.kr(20, 2000)))}.play
 Synth(\fftInv, [\inBus, ~bus, \outBus, 0])
-Synth(\bdPT, [\pitch, 1, \time, 1, \mul, 10, \outBus, ~bus])
-~inOct.value(8, ~bus)
+Synth(\bdPT, [\pitch, 1, \time, 0.25, \mul, 10, \outBus, ~bus])
+~inOct.value(4, ~bus)
 // to just play from bus
 {In.ar(~bus)}.play
-~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 5, true, nil, 1, ~bus, 1)
+~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 5, false, 4, 1, ~bus, 4)
 
 
 // functionality I need to add: reverse envelopes!
