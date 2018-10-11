@@ -266,9 +266,9 @@ needs to be at least a minute
 
 10 seconds: move to pitch classes: suddenly compress resynth into an octave
 10 seconds: introduce the filterbank as a parallel! Do the same thing with filterbank/samples and pcs compressed into an octave
-15 seconds: inversion in combo with filters, versus both increasingly stretched original and a resynth
-final closing gesture: additive synth adding notes one at a time, and slowly crossfading to FFT inversion (switching panning meanwhile). Do by sending to two buses (left/right processing), which go to four buses (left/right plain, right/left fft'd), and crossfade stuff in those buses
 
+quasi-closing gesture: additive synth adding notes one at a time, and slowly crossfading to FFT inversion (switching panning meanwhile). Do by sending to two buses (left/right processing), which go to four buses (left/right plain, right/left fft'd), and crossfade stuff in those buses
+15 seconds: inversion in combo with filters, versus both increasingly stretched original and a resynth
 
 Durations: cycle through something proportional to the peak frequencies
 Panning: just alternate hard left/right

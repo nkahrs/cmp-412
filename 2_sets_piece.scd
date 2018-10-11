@@ -1,9 +1,10 @@
 (
 Routine({
-	var dur, pattern, ch, thisdur;
+	var dur, pattern, ch, thisdur, allfreqs;
 	var fftInv, fftInvLS, fftInvRS;
 
-	pattern = Pseq(2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239].reverse, inf).asStream; // recurring pattern to draw durations etc from
+	allfreqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]; // brake drum spectrum
+	pattern = Pseq(2*926/allfreqs.reverse, inf).asStream; // recurring pattern to draw durations etc from
 	dur = 0; // duration elapsed
 	ch = 0; // left or right?
 
@@ -15,7 +16,7 @@ Routine({
 	while({dur < 5}, { // 5 seconds just time-shifting
 		thisdur = pattern.next;
 		thisdur.postln;
-		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outbus, ch]);
+		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
 		ch = 1 - ch;
 		dur = dur + thisdur;
 		thisdur.wait;
@@ -26,13 +27,49 @@ Routine({
 	while({dur < 5}, { // 5 seconds, introduce FFT inversion thing
 		thisdur = pattern.next;
 		thisdur.postln;
-		Synth(\bdPT, [\pitch, 1, \time, (1/6)/thisdur, \mul, 10*max((1+thisdur)**3-1,1),
+		Synth(\bdPT, [\pitch, 1, \time, (1/6)/thisdur, \mul, 10*min((1+thisdur)**3-1,1),
 			\outBus, fftInv[ch]]);
 		ch = 1 - ch;
 		dur = dur + thisdur;
-		(thisdur*1.5).wait;
+		(thisdur).wait;
 	});
 	["1b done", dur].postln;
+
+	dur = 0;
+	while({dur < 5}, { // 5 seconds, have 2 normal, 1 inverted, all "octave"-shifted
+		var thispitch;
+		2.do{
+			thisdur = pattern.next;
+			thispitch = 1/((0.25/thisdur).linexp((1/16),1,4,1).round);
+			[thisdur, thispitch].postln;
+			Synth(\bdPT, [\pitch, thispitch,
+				\time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
+			ch = 1 - ch;
+		dur = dur + thisdur;
+		thisdur.wait;
+		};
+		thisdur = pattern.next;
+		thispitch = ((0.25/thisdur).linexp((1/16),1,4,1).round);
+		[thisdur, thispitch, "fft"].postln;
+		Synth(\bdPT, [\pitch, thispitch,
+			\time, 4*thisdur, \mul, (1+thisdur)**2-1, \outBus, fftInv[ch]]);
+		ch = 1 - ch;
+		dur = dur + (2*thisdur/3);
+		(2*thisdur/3).wait;
+	});
+	["1c done", dur].postln;
+
+	dur = 0;
+	while({dur < 10}, { // introduce additive resynthesis
+		thisdur = pattern.next;
+		Synth(\bdPT, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
+		ch = 1 - ch;
+		~additive.value(allfreqs, 1/thisdur, false, nil, thisdur, ch, 1, true);
+		dur = dur + (1/thisdur);
+		(1/thisdur).wait;
+	});
+	["2 done", dur].postln;
+
 
 	// cleanup
 	[fftInv[0], fftInv[1], fftInvLS, fftInvRS].do{arg i; i.free;};
@@ -40,3 +77,9 @@ Routine({
 
 }).play;
 )
+
+~foo = 2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]
+~foo.linexp(0, 1, 2.5, 7).round
+~foo
+
+1/(((0.25/thisdur).linexp((1/16),1,4,1).round)

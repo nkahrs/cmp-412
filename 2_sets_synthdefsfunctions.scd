@@ -92,7 +92,7 @@ SynthDef(\bdPT, {
 };
 
 ~additive = {// additive resynthesis with a lot of controls
-	arg freqs, dur, invert, octave, transpose, outBus, mul;
+	arg freqs, dur, invert, octave, transpose, outBus, mul, reverse;
 	/* freqs: list of input frequencies
 	dur: duration in seconds
 	invert: if true, invert freqs; otherwise (including nil) no
@@ -100,6 +100,7 @@ SynthDef(\bdPT, {
 	transpose: transpose output by ratio if specified, or default to 1 if not number
 	outBus: which bus to send out to (default 0)
 	multiplier: how much to multiply output by (default 1)
+	reverse: make all the envelopes go backwards
 	*/
 
 	var foo, f0, amps, durs;
@@ -129,7 +130,11 @@ SynthDef(\bdPT, {
 		arg i;
 		{var sound, env;
 			sound = SinOsc.ar(freqs[i]) * amps[i];
-			env = EnvGen.ar(Env(times:[0.01, durs[i]]), doneAction:2);
+			env = EnvGen.ar(
+				if(reverse==true,
+					Env([0,0,1,0], [durs.maxItem-durs[i], 0.01, durs[i]]),
+					Env(times:[0.01, durs[i]])
+			), doneAction:2);
 			Out.ar(outBus, mul*sound*env);
 		}.play
 	};
@@ -137,6 +142,7 @@ SynthDef(\bdPT, {
 	[foo, freqs, amps, durs]
 };
 )
+
 
 
 // test
@@ -147,7 +153,7 @@ Synth(\bdPT, [\pitch, 1, \time, 0.25, \mul, 10, \outBus, ~bus])
 ~inOct.value(4, ~bus)
 // to just play from bus
 {In.ar(~bus)}.play
-~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 5, false, 4, 1, ~bus, 4)
+~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 1, false, nil, 1, 0, 4, true)
 
 
 // functionality I need to add: reverse envelopes!
