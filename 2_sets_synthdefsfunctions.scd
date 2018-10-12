@@ -1,6 +1,7 @@
 // to load buffer
 // synthdefs
 (
+Routine({
 // FFT-based inversion
 SynthDef(\fftInv, {
 	arg inBus, outBus;
@@ -28,7 +29,10 @@ SynthDef(\fftInv, {
 }).load(s);
 
 ~thebuf = Buffer.read(s, "C:/Users/nkahrs/Box Sync/Noah Kahrs/1b Autumn 2018/composition/Bob's Class/10 06 brake drum single hit mono.wav"); //"/Volumes/snd/users/nkahrs/2 Fall 2018/cmp-412.git/trunk/10 06 brake drum single hit mono.wav"); use after-comment bit on Wozzeck
-SynthDef(\bdPT, {
+s.sync;
+	~thebuf.postln;
+
+SynthDef(\bdPT, { // play brake drum controlling pitch and time
 	arg pitch, time, mul, outBus; // ratios of pitch and time, gain as multiplier, bus to sendo ut
 	var pitchshift;
 	// play rate = time shift
@@ -38,7 +42,26 @@ SynthDef(\bdPT, {
 		PitchShift.ar(PlayBuf.ar(1, ~thebuf,time, doneAction:2), 0.05, pitchshift),
 		min(7500*pitch, 22050)));
 }).load(s);
+
+// same but playing in reverse
+SynthDef(\bdPTRev, { // play brake drum controlling pitch and time
+	arg pitch, time, mul, outBus; // ratios of pitch and time, gain as multiplier, bus to sendo ut
+	var pitchshift;
+	// play rate = time shift
+	// pitch shift = pitch / time. Only kinda works, but for this that's fine.
+	pitchshift = pitch/time;
+	Out.ar(outBus, EnvGen.kr(
+		Env([0, 1, 1, 0], [0.01, (~thebuf.numFrames)/44100/time]), doneAction:2
+	)*mul*LPF.ar(
+		PitchShift.ar(PlayBuf.ar(1, ~thebuf, 0-time, 1, ~thebuf.numFrames), 0.05, pitchshift),
+		min(7500*pitch, 22050)));
+}).load(s);
+
+	"all synthdefs loaded".postln;
+}).play;
 )
+
+
 
 // functions
 (
@@ -149,11 +172,12 @@ SynthDef(\bdPT, {
 ~bus = Bus.audio(s);
 {Out.ar(~bus, SinOsc.ar(MouseX.kr(20, 2000)))}.play
 Synth(\fftInv, [\inBus, ~bus, \outBus, 0])
-Synth(\bdPT, [\pitch, 1, \time, 0.25, \mul, 10, \outBus, ~bus])
+Synth(\bdPT, [\pitch, 0.25, \time, 0.25, \mul, 10, \outBus, 0])
+Synth(\bdPTRev, [\pitch, 0.25, \time, 0.5, \mul, 10, \outBus, 0])
 ~inOct.value(4, ~bus)
 // to just play from bus
 {In.ar(~bus)}.play
-~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 1, false, nil, 1, 0, 4, true)
+~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 1, true, 4, 1, 0, 4, true)
 
 
 // functionality I need to add: reverse envelopes!
