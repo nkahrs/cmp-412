@@ -193,7 +193,7 @@ shiftoct = { // function to octave-shift a frequency until between maxs and mins
 		{if((freq > min),
 			{freq},
 			{shiftoct.value(freq * 2, max, min)}
-	)}
+		)}
 	)
 };
 // nb this crashes if given freq=0
@@ -325,17 +325,67 @@ Routine({
 // args for ~additive: freqs, dur, invert, octave, transpose, outBus, mul, reverse;
 
 
+// some stuff from the bottom of "_piece", for reference about what the "pattern" is
+~foo = 2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]
+~foo.linexp(0, 1, 2.5, 7).round
+~foo
+
+/* last section: alternate between (0) sound->fftinv->inoct, (1) sound->inoct->fftinv, (2) additive with both octave shift and inversion
+
+hard pan all...
+in total we'll need four buses (sound->fftinv, fftinv->inoct, sound->inoct, inoct->fftinv) and I'll just manually free some synths
+*/
+
+1/(((0.25/thisdur).linexp((1/16),1,4,1).round))
+
+
 // using both filterbank and FFT flip?
 ~bus
 ~cus
+~bus = Bus.audio(s);
 ~cus = Bus.audio(s);
+
+// the two basic processed sounds ("0" and "1")
+(
+var foo;
+// foo = [ 5, 0.57178141401667, 2.4704968134482 ];
+// foo = [ 6, 0.74109643857543, 3.03141680842 ];
+foo = [ 6, 2, 5 ];
+Routine({
+	~inOct.value(foo[0], ~cus, 40, 0); s.sync;
+	Synth(\fftInv, [\inBus, ~bus, \outBus, ~cus]); s.sync;
+	Synth(\bdPT, [\pitch, foo[1], \time, foo[1], \mul, 4**foo[2], \outBus, ~bus])
+}).play
+)
+
+(
+var foo;
+// foo = [ 5, 0.57178141401667, 2.4704968134482 ];
+// foo = [ 6, 0.74109643857543, 3.03141680842 ];
+foo = [ 6, 2, 5 ];
+Routine({
+	Synth(\fftInv, [\inBus, ~cus, \outBus, 0]); s.sync;
+	~inOct.value(foo[0], ~bus, 40, ~cus); s.sync;
+	Synth(\bdPT, [\pitch, foo[1], \time, foo[1], \mul, 4**foo[2], \outBus, ~bus])
+}).play
+)
 
 Synth(\fftInv, [\inBus, ~cus, \outBus, 0])
 Synth(\bdPT, [\pitch, 0.25, \time, 0.25, \mul, 100, \outBus, ~bus])
 Synth(\bdPTRev, [\pitch, 0.25, \time, 0.5, \mul, 10, \outBus, ~bus])
 ~inOct.value(8, ~bus, 40, ~cus)
 
-/* last section: alternate between (0) sound->fftinv->inoct, (1) sound->inoct->fftinv, (2) additive with both octave shift and inversion
 
-hard pan all...
-in total we'll need four buses (sound->fftinv, fftinv->inoct, sound->inoct, inoct->fftinv) and I'll just manually free some synths
+// how to get the parameters?
+
+
+// oct, time, mul
+(
+~foo.reverse.collect({arg thisdur; var thisoct, thistime, thismul;
+	thisoct = min(7, (thisdur*8).round);
+	thistime = thisdur;
+	thismul = ((1+thisdur)**2);
+	[thisoct, thistime, thismul].postln;
+});
+nil
+)

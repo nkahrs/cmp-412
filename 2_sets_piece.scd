@@ -99,9 +99,9 @@ Routine({
 
 	totaldur = totaldur + dur;
 	dur = 0;
-	while({dur < 10}, { // pcs compressed into an octave, but recapitulating style of opening
+	while({dur < 7}, { // pcs compressed into an octave, but recapitulating style of opening
 		thisdur = pattern.next;
-		thisdur.postln;
+		(thisdur*[1,1.5]).postln;
 		~additive.value(allfreqs, thisdur*4, false, min(8,thisdur*8.round), thisdur, ch, min((1+thisdur)**2-1, 2), false);
 		ch = 1 - ch;
 		thisdur = thisdur*1.5;
@@ -113,7 +113,7 @@ Routine({
 
 	totaldur = totaldur + dur;
 	dur = 0;
-	while({dur < 10}, { // recapitauling style of opening, but with filterbank
+	while({dur < 9}, { // recapitauling style of opening, but with filterbank
 		thisdur = pattern.next;
 		thisdur.postln;
 		~inOct.value(min(8,thisdur*8.round),
@@ -152,44 +152,47 @@ Routine({
 
 	tmp = [Bus.audio(s), Bus.audio(s), Bus.audio(s), Bus.audio(s), nil, nil, 0];
 	s.sync;
-	while({not(and((dur > 15), (thisdur > 1)))}, {// go at least beyond 15 seconds and finish on long note
-		var thisoct, thismul, thistime;
+	2.do{
+		while({thisdur < 2}, {// go twice, finish on the long note
+			var thisoct, thismul, thistime;
 
+			thisdur = pattern.next;
+
+			thisoct = min(7, (thisdur*8).round)-1;
+			thistime = thisdur;
+			thismul = min((1+thisdur)**2, 5);
+			[[thisoct, thistime, thismul], tmp[6]].postln;
+
+			switch(tmp[6],
+				0, { // sound -> fftinv -> inoct (clear last "1")
+					tmp[5].free;
+					tmp[5] = nil;
+					~inOct.value(thisoct, tmp[0], 2*thisdur, ch); s.sync;
+					tmp[4] = Synth(\fftInv, [\inBus, tmp[1], \outBus, tmp[0]]); s.sync;
+					Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, 4**thismul, \outBus, tmp[1]]);
+				},
+				1, { // sound -> inoct -> fftinv
+					tmp[4].free;
+					tmp[4] = nil;
+					tmp[5] = Synth(\fftInv, [\inBus, tmp[2], \outBus, ch]); s.sync;
+					~inOct.value(thisoct, tmp[3], 2*thisdur, tmp[2]); s.sync;
+					Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, 4**thismul, \outBus, tmp[3]]);
+				},
+				2, { // additive (clear last "0")
+					~additive.value(allfreqs, 2/thisdur, true, thisoct, nil, ch, 0.75**thismul, false)
+					// args for ~additive: freqs, dur, invert, octave, transpose, outBus, mul, reverse;
+				}
+			);
+
+			ch = 1 - ch;
+			tmp[6] = (tmp[6] + 1) % 3;
+
+			dur = dur + thisdur;
+			thisdur.wait;
+		});
 		thisdur = pattern.next;
-		// [thisdur, tmp[6]].postln;
-
-		thisoct = min(8, thisdur*8.round);
-		thistime = 1/thisdur;
-		thismul = (1+thisdur)**2;
-		[thisdur, tmp[6], thistime].postln;
-
-		switch(tmp[6],
-			0, { // sound -> fftinv -> inoct (clear last "1")
-				tmp[5].free;
-				~inOct.value(thisoct, tmp[0], 2*thisdur, ch);
-				tmp[4] = Synth(\fftInv, [\inBus, tmp[1], \outBus, tmp[0]]);
-				Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, thismul * 50, \outBus, tmp[1]]);
-			},
-			1, { // sound -> inoct -> fftinv
-				tmp[4].free;
-				tmp[5] = Synth(\fftInv, [\inBus, tmp[2], \outBus, ch]);
-				~inOct.value(thisoct, tmp[3], 2*thisdur, tmp[2]);
-				Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, thismul * 50, \outBus, tmp[3]]);
-			},
-			2, { // additive (clear last "0")
-				~additive.value(allfreqs, 2*thisdur, true, thisoct, nil, ch, min(thismul-1, 10), false)
-				// args for ~additive: freqs, dur, invert, octave, transpose, outBus, mul, reverse;
-			}
-		);
-		// Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
-
-		ch = 1 - ch;
-		if((thisdur == 2), {tmp[6] = tmp[6] + 1}, {tmp[6] = tmp[6] + 2});
-		tmp[6] = tmp[6] % 3;
-
-		dur = dur + thisdur;
-		thisdur.wait;
-	});
+	};
+	["6 done", dur].postln;
 
 	totaldur = totaldur + dur;
 	dur = 0;
@@ -199,15 +202,9 @@ Routine({
 	5.wait;
 
 	[fftInv[0], fftInv[1], fftInvLS, fftInvRS, octShift[0], octShift[1]].do{arg i; i.free;};
-	6.do{arg i; tmp[i].free};
+	6.do{arg i; if(tmp[i]==nil, {}, {tmp[i].free});};
 	"resources freed".postln;
 
 
 }).play;
 )
-
-~foo = 2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]
-~foo.linexp(0, 1, 2.5, 7).round
-~foo
-
-1/(((0.25/thisdur).linexp((1/16),1,4,1).round)
