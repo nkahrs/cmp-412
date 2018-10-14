@@ -289,3 +289,53 @@ The title refers to flipping frequencies from FFT bin 512 to 1: the mosquito (ab
 // making a duration scheme
 2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]
 ~foo = Pseq(2*926/[926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], inf).asStream;
+
+
+// most drafting has occured separately and/or gone straight into the piece, but a few things to work out offline now that I'm finishing it...
+
+// quasi-closing gesture: additive synth adding notes one at a time, and slowly crossfading to FFT inversion (switching panning meanwhile). Do by sending to two buses (left/right processing), which go to four buses (left/right plain, right/left fft'd), and crossfade stuff in those buses
+
+(
+var allfreqs, tmp;
+allfreqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239];
+
+Routine({
+	tmp = Array.fill(3, {Bus.audio(s)});
+	tmp.postln;
+	s.sync;
+
+	{Out.ar(0, In.ar(tmp[0]) * EnvGen.kr(Env([0,1,0], [0.01,8], \sqr), doneAction:2))}.play;
+	{Out.ar(1, In.ar(tmp[0]) * EnvGen.kr(Env([0,1,0], [8, 0.01], \sqr), doneAction:2))}.play;
+	{Out.ar(1, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,0], [0.01,8], \sqr), doneAction:2))}.play;
+	{Out.ar(0, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,0], [8, 0.01], \sqr), doneAction:2))}.play;
+
+	~additive.value(allfreqs, 8, true, nil, 8, tmp[0], 2, true);
+
+	Synth(\fftInv, [\inBus, tmp[2], \outBus, tmp[1]]);
+	Synth(\bdPTRev, [\pitch, 8, \time, 1.148/8, \mul, 20,
+		\outBus, tmp[2]]);
+
+	8.wait;
+	tmp.do{arg i; i.free;};
+	tmp.postln;
+}).play;
+)
+
+
+// args for ~additive: freqs, dur, invert, octave, transpose, outBus, mul, reverse;
+
+
+// using both filterbank and FFT flip?
+~bus
+~cus
+~cus = Bus.audio(s);
+
+Synth(\fftInv, [\inBus, ~cus, \outBus, 0])
+Synth(\bdPT, [\pitch, 0.25, \time, 0.25, \mul, 100, \outBus, ~bus])
+Synth(\bdPTRev, [\pitch, 0.25, \time, 0.5, \mul, 10, \outBus, ~bus])
+~inOct.value(8, ~bus, 40, ~cus)
+
+/* last section: alternate between (0) sound->fftinv->inoct, (1) sound->inoct->fftinv, (2) additive with both octave shift and inversion
+
+hard pan all...
+in total we'll need four buses (sound->fftinv, fftinv->inoct, sound->inoct, inoct->fftinv) and I'll just manually free some synths

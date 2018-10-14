@@ -1,6 +1,6 @@
 (
 Routine({
-	var dur, pattern, ch, thisdur, allfreqs, totaldur;
+	var dur, pattern, ch, thisdur, allfreqs, totaldur, tmp;
 	var fftInv, fftInvLS, fftInvRS, octShift;
 
 	allfreqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]; // brake drum spectrum
@@ -32,7 +32,7 @@ Routine({
 		thisdur = pattern.next;
 		thisdur.postln;
 		Synth(\bdPT, [\pitch, 1, \time, (1/6)/thisdur, \mul, 10*min((1+thisdur)**3-1,1),
-			\outBus, fftInv[ch]]);
+		\outBus, fftInv[ch]]);
 		ch = 1 - ch;
 		dur = dur + thisdur;
 		(thisdur).wait;
@@ -48,7 +48,7 @@ Routine({
 			thispitch = 1/((0.25/thisdur).linexp((1/16),1,4,1).round);
 			[thisdur, thispitch].postln;
 			Synth(\bdPT, [\pitch, thispitch,
-				\time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
+			\time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
 			ch = 1 - ch;
 			dur = dur + thisdur;
 			thisdur.wait;
@@ -57,7 +57,7 @@ Routine({
 		thispitch = ((0.25/thisdur).linexp((1/16),1,4,1).round);
 		[thisdur, thispitch, "fft"].postln;
 		Synth(\bdPT, [\pitch, thispitch,
-			\time, 4*thisdur, \mul, (1+thisdur)**6-1, \outBus, fftInv[ch]]);
+		\time, 4*thisdur, \mul, (1+thisdur)**6-1, \outBus, fftInv[ch]]);
 		ch = 1 - ch;
 		dur = dur + (2*thisdur/3);
 		(2*thisdur/3).wait;
@@ -66,20 +66,22 @@ Routine({
 
 	totaldur = totaldur + dur;
 	dur = 0;
+	tmp = ch;
 	while({dur < 10}, { // introduce additive resynthesis
-		thisdur = pattern.next;
-		Synth(\bdPT, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
-		ch = 1 - ch;
-		~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, true);
-		dur = dur + (1/thisdur);
-		(1/thisdur).postln.wait;
-		thisdur = pattern.next;
+		thisdur = 1.5 * pattern.next;
 
-		Synth(\bdPTRev, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
+		if( (tmp==ch), {
+			Synth(\bdPTRev, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
+			~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, false);
+			}, {
+			Synth(\bdPT, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
+			~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, true);
+		});
+
 		ch = 1 - ch;
-		~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, false);
 		dur = dur + (1/thisdur);
 		(1/thisdur).postln.wait;
+
 	});
 	["2 done", dur].postln;
 
@@ -87,13 +89,9 @@ Routine({
 	dur = 0;
 	while({dur < 10}, { // combine additive synthesis with inversion
 		thisdur = 1/2/(pattern.next);
-		// ~additive.value(allfreqs, thisdur, true, nil, thisdur, ch, 1, false);
-		// ch = 1 - ch;
-		thisdur = 1/2/(pattern.next);
-		Synth(\bdPTRev, [\pitch, thisdur, \time, thisdur, \mul, 10**(1/thisdur), \outBus, fftInv[ch]]);
+		Synth(\bdPTRev, [\pitch, thisdur, \time, thisdur, \mul, min(20,10**(1/thisdur)), \outBus, fftInv[ch]]);
 		ch = 1 - ch;
 		~additive.value(allfreqs, thisdur, true, nil, thisdur, fftInv[ch], 10**(2/thisdur), true);
-		ch.postln;
 		thisdur.postln.wait;
 		dur = dur + thisdur;
 	});
@@ -104,8 +102,9 @@ Routine({
 	while({dur < 10}, { // pcs compressed into an octave, but recapitulating style of opening
 		thisdur = pattern.next;
 		thisdur.postln;
-		~additive.value(allfreqs, thisdur*4, false, thisdur.linexp( 926/7239, 1, 2.5, 6.5).round, thisdur, ch, max((1+thisdur)**2-1, 0.5), false);
+		~additive.value(allfreqs, thisdur*4, false, min(8,thisdur*8.round), thisdur, ch, min((1+thisdur)**2-1, 2), false);
 		ch = 1 - ch;
+		thisdur = thisdur*1.5;
 		dur = dur + thisdur;
 		thisdur.wait;
 	});
@@ -117,16 +116,80 @@ Routine({
 	while({dur < 10}, { // recapitauling style of opening, but with filterbank
 		thisdur = pattern.next;
 		thisdur.postln;
-		// ~additive.value(allfreqs, thisdur*4, false, thisdur.linexp( 926/7239, 1, 0.5, 6.5).round, thisdur, ch, max((1+thisdur)**2-1, 0.5), false);
-		~inOct.value(thisdur.linexp( 926/7239, 1, 2.5, 6.5).round,
+		~inOct.value(min(8,thisdur*8.round),
 			octShift[ch], thisdur*1.25, ch);
 		s.sync;
-		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, octShift[ch]]);
+		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, min((1+thisdur)**2-1, 10), \outBus, octShift[ch]]);
 		ch = 1 - ch;
+		thisdur = thisdur*1.5;
 		dur = dur + thisdur;
 		thisdur.wait;
 	});
 	["4b done", dur].postln;
+
+	totaldur = totaldur + dur;
+	dur = 0;
+	// a big crossfade of FFT inversion versus pitch inversion
+	tmp = [Bus.audio(s), Bus.audio(s), Bus.audio(s), nil];
+	s.sync;
+	{Out.ar(0, In.ar(tmp[0]) * EnvGen.kr(Env([0,1,0], [0.01,8], \sqr), doneAction:2))}.play;
+	{Out.ar(1, In.ar(tmp[0]) * EnvGen.kr(Env([0,1,0], [8, 0.01], \sqr), doneAction:2))}.play;
+	{Out.ar(1, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,0], [0.01,8], \sqr), doneAction:2))}.play;
+	{Out.ar(0, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,0], [8, 0.01], \sqr), doneAction:2))}.play;
+	~additive.value(allfreqs, 8, true, nil, 8, tmp[0], 2, true);
+	tmp[3] = Synth(\fftInv, [\inBus, tmp[2], \outBus, tmp[1]]);
+	Synth(\bdPTRev, [\pitch, 8, \time, 1.148/8, \mul, 20,
+		\outBus, tmp[2]]);
+	8.wait;
+	tmp.do{arg i; i.free;};
+	"5 done in 8".postln;
+	totaldur = totaldur + 8;
+
+	// closing section: trade off between buffer->fftinv->inoct, buffer->inoct->fftinv, and an additive synth
+	// requires four buses (0-3), two synth-holders (4-5)), and (6) something to keep track of where we are in the cycle
+
+	thisdur = 0;
+
+	tmp = [Bus.audio(s), Bus.audio(s), Bus.audio(s), Bus.audio(s), nil, nil, 0];
+	s.sync;
+	while({not(and((dur > 15), (thisdur > 1)))}, {// go at least beyond 15 seconds and finish on long note
+		var thisoct, thismul, thistime;
+
+		thisdur = pattern.next;
+		// [thisdur, tmp[6]].postln;
+
+		thisoct = min(8, thisdur*8.round);
+		thistime = 1/thisdur;
+		thismul = (1+thisdur)**2;
+		[thisdur, tmp[6], thistime].postln;
+
+		switch(tmp[6],
+			0, { // sound -> fftinv -> inoct (clear last "1")
+				tmp[5].free;
+				~inOct.value(thisoct, tmp[0], 2*thisdur, ch);
+				tmp[4] = Synth(\fftInv, [\inBus, tmp[1], \outBus, tmp[0]]);
+				Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, thismul * 50, \outBus, tmp[1]]);
+			},
+			1, { // sound -> inoct -> fftinv
+				tmp[4].free;
+				tmp[5] = Synth(\fftInv, [\inBus, tmp[2], \outBus, ch]);
+				~inOct.value(thisoct, tmp[3], 2*thisdur, tmp[2]);
+				Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, thismul * 50, \outBus, tmp[3]]);
+			},
+			2, { // additive (clear last "0")
+				~additive.value(allfreqs, 2*thisdur, true, thisoct, nil, ch, min(thismul-1, 10), false)
+				// args for ~additive: freqs, dur, invert, octave, transpose, outBus, mul, reverse;
+			}
+		);
+		// Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
+
+		ch = 1 - ch;
+		if((thisdur == 2), {tmp[6] = tmp[6] + 1}, {tmp[6] = tmp[6] + 2});
+		tmp[6] = tmp[6] % 3;
+
+		dur = dur + thisdur;
+		thisdur.wait;
+	});
 
 	totaldur = totaldur + dur;
 	dur = 0;
@@ -136,7 +199,7 @@ Routine({
 	5.wait;
 
 	[fftInv[0], fftInv[1], fftInvLS, fftInvRS, octShift[0], octShift[1]].do{arg i; i.free;};
-
+	6.do{arg i; tmp[i].free};
 	"resources freed".postln;
 
 
