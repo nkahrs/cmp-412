@@ -177,7 +177,7 @@ Synth(\bdPTRev, [\pitch, 0.25, \time, 0.5, \mul, 10, \outBus, 0])
 ~inOct.value(4, ~bus)
 // to just play from bus
 {In.ar(~bus)}.play
-~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 1, true, 4, 1, 0, 4, true)
+~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 10, true, 4, 1, 0, 4, false)
 
 
 // functionality I need to add: reverse envelopes!

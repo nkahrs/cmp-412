@@ -15,69 +15,69 @@ Routine({
 	fftInvRS = Synth(\fftInv, [\inBus, fftInv[1], \outBus, 1]);
 
 	while({dur < 5}, { // 5 seconds just time-shifting
-	thisdur = pattern.next;
-	thisdur.postln;
-	Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
-	ch = 1 - ch;
-	dur = dur + thisdur;
-	thisdur.wait;
+		thisdur = pattern.next;
+		thisdur.postln;
+		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
+		ch = 1 - ch;
+		dur = dur + thisdur;
+		thisdur.wait;
 	});
 	["1a done", dur].postln;
 
 	totaldur = totaldur + dur;
 	dur = 0;
 	while({dur < 5}, { // 5 seconds, introduce FFT inversion thing
-	thisdur = pattern.next;
-	thisdur.postln;
-	Synth(\bdPT, [\pitch, 1, \time, (1/6)/thisdur, \mul, 10*min((1+thisdur)**3-1,1),
-	\outBus, fftInv[ch]]);
-	ch = 1 - ch;
-	dur = dur + thisdur;
-	(thisdur).wait;
+		thisdur = pattern.next;
+		thisdur.postln;
+		Synth(\bdPT, [\pitch, 1, \time, (1/6)/thisdur, \mul, 10*min((1+thisdur)**3-1,1),
+			\outBus, fftInv[ch]]);
+		ch = 1 - ch;
+		dur = dur + thisdur;
+		(thisdur).wait;
 	});
 	["1b done", dur].postln;
 
 	totaldur = totaldur + dur;
 	dur = 0;
 	while({dur < 5}, { // 5 seconds, have 2 normal, 1 inverted, all "octave"-shifted
-	var thispitch;
-	2.do{
-	thisdur = pattern.next;
-	thispitch = 1/((0.25/thisdur).linexp((1/16),1,4,1).round);
-	[thisdur, thispitch].postln;
-	Synth(\bdPT, [\pitch, thispitch,
-	\time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
-	ch = 1 - ch;
-	dur = dur + thisdur;
-	thisdur.wait;
-	};
-	thisdur = pattern.next;
-	thispitch = ((0.25/thisdur).linexp((1/16),1,4,1).round);
-	[thisdur, thispitch, "fft"].postln;
-	Synth(\bdPT, [\pitch, thispitch,
-	\time, 4*thisdur, \mul, (1+thisdur)**6-1, \outBus, fftInv[ch]]);
-	ch = 1 - ch;
-	dur = dur + (2*thisdur/3);
-	(2*thisdur/3).wait;
+		var thispitch;
+		2.do{
+			thisdur = pattern.next;
+			thispitch = 1/((0.25/thisdur).linexp((1/16),1,4,1).round);
+			[thisdur, thispitch].postln;
+			Synth(\bdPT, [\pitch, thispitch,
+				\time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
+			ch = 1 - ch;
+			dur = dur + thisdur;
+			thisdur.wait;
+		};
+		thisdur = pattern.next;
+		thispitch = ((0.25/thisdur).linexp((1/16),1,4,1).round);
+		[thisdur, thispitch, "fft"].postln;
+		Synth(\bdPT, [\pitch, thispitch,
+			\time, 4*thisdur, \mul, (1+thisdur)**6-1, \outBus, fftInv[ch]]);
+		ch = 1 - ch;
+		dur = dur + (2*thisdur/3);
+		(2*thisdur/3).wait;
 	});
 	["1c done", dur].postln;
 
 	totaldur = totaldur + dur;
 	dur = 0;
 	while({dur < 10}, { // introduce additive resynthesis
-	thisdur = pattern.next;
-	Synth(\bdPT, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
-	ch = 1 - ch;
-	~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, true);
-	dur = dur + (1/thisdur);
-	(1/thisdur).postln.wait;
-	thisdur = pattern.next;
+		thisdur = pattern.next;
+		Synth(\bdPT, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
+		ch = 1 - ch;
+		~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, true);
+		dur = dur + (1/thisdur);
+		(1/thisdur).postln.wait;
+		thisdur = pattern.next;
 
-	Synth(\bdPTRev, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
-	ch = 1 - ch;
-	~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, false);
-	dur = dur + (1/thisdur);
-	(1/thisdur).postln.wait;
+		Synth(\bdPTRev, [\pitch, thisdur, \time, thisdur, \mul, 1, \outBus, ch]);
+		ch = 1 - ch;
+		~additive.value(allfreqs, 2/3/thisdur, false, nil, thisdur, ch, 1, false);
+		dur = dur + (1/thisdur);
+		(1/thisdur).postln.wait;
 	});
 	["2 done", dur].postln;
 
@@ -99,10 +99,26 @@ Routine({
 
 	totaldur = totaldur + dur;
 	dur = 0;
+	while({dur < 10}, { // pcs compressed into an octave, but recapitulating style of opening
+		thisdur = pattern.next;
+		thisdur.postln;
+		~additive.value(allfreqs, thisdur*4, false, thisdur.linexp( 926/7239, 1, 0.5, 6.5).round, thisdur, ch, max((1+thisdur)**2-1, 0.5), false);
+		ch = 1 - ch;
+		dur = dur + thisdur;
+		thisdur.wait;
+	});
+	["4 done", dur].postln;
+
+	totaldur = totaldur + dur;
+	dur = 0;
 	// cleanup
-	[fftInv[0], fftInv[1], fftInvLS, fftInvRS].do{arg i; i.free;};
-	"resources freed".postln;
 	("total duration: " ++ totaldur).postln;
+	"waiting 5 seconds for reverb".postln;
+	5.wait;
+
+	[fftInv[0], fftInv[1], fftInvLS, fftInvRS].do{arg i; i.free;};
+
+	"resources freed".postln;
 
 
 }).play;
