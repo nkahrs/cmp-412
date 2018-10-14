@@ -66,14 +66,15 @@ SynthDef(\bdPTRev, { // play brake drum controlling pitch and time
 // functions
 (
 ~inOct={
-	arg target, inbus;
+	arg target, inbus, dur, outBus;
 	{
-		var sound, filterbank, pitchshifts;
+		var sound, filterbank, pitchshifts, env;
 		sound = In.ar(inbus);
 		filterbank = Array.fill(10);
+		env = EnvGen.kr(Env([0,1,1,0],[0.01,dur,dur]), doneAction:2);
 		10.do{
 			arg i;
-			filterbank[i] = BPF.ar(sound, 3*22050/(2**(i+2)), 3/2);
+			filterbank[i] = BPF.ar(sound, 3*22050/(2**(i+2)), 3/2) * env;
 		};
 		filterbank[0] = SinOsc.ar(0); // highest one is noise-ridden
 		pitchshifts = Array.fill(10);
@@ -83,9 +84,9 @@ SynthDef(\bdPTRev, { // play brake drum controlling pitch and time
 				filterbank[i],
 				0.01,
 				(0.5)**(target-i)
-			);
+			) * env;
 		};
-		Mix.ar(pitchshifts)
+		Out.ar(outBus, Mix.ar(pitchshifts) * env);
 	}.play
 };
 
@@ -174,7 +175,7 @@ SynthDef(\bdPTRev, { // play brake drum controlling pitch and time
 Synth(\fftInv, [\inBus, ~bus, \outBus, 0])
 Synth(\bdPT, [\pitch, 0.25, \time, 0.25, \mul, 10, \outBus, 0])
 Synth(\bdPTRev, [\pitch, 0.25, \time, 0.5, \mul, 10, \outBus, 0])
-~inOct.value(4, ~bus)
+~inOct.value(4, ~bus, 10)
 // to just play from bus
 {In.ar(~bus)}.play
 ~additive.value([926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239], 10, true, 4, 1, 0, 4, false)

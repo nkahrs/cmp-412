@@ -1,7 +1,7 @@
 (
 Routine({
 	var dur, pattern, ch, thisdur, allfreqs, totaldur;
-	var fftInv, fftInvLS, fftInvRS;
+	var fftInv, fftInvLS, fftInvRS, octShift;
 
 	allfreqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]; // brake drum spectrum
 	pattern = Pseq(2*926/allfreqs.reverse, inf).asStream; // recurring pattern to draw durations etc from
@@ -11,8 +11,10 @@ Routine({
 
 	// two FFT inversion channels pointing going opposite directions: busses and synths
 	fftInv = [Bus.audio(s), Bus.audio(s)];
+	octShift = [Bus.audio(s), Bus.audio(s)];
 	fftInvLS = Synth(\fftInv, [\inBus, fftInv[0], \outBus, 0]);
 	fftInvRS = Synth(\fftInv, [\inBus, fftInv[1], \outBus, 1]);
+	s.sync;
 
 	while({dur < 5}, { // 5 seconds just time-shifting
 		thisdur = pattern.next;
@@ -102,12 +104,29 @@ Routine({
 	while({dur < 10}, { // pcs compressed into an octave, but recapitulating style of opening
 		thisdur = pattern.next;
 		thisdur.postln;
-		~additive.value(allfreqs, thisdur*4, false, thisdur.linexp( 926/7239, 1, 0.5, 6.5).round, thisdur, ch, max((1+thisdur)**2-1, 0.5), false);
+		~additive.value(allfreqs, thisdur*4, false, thisdur.linexp( 926/7239, 1, 2.5, 6.5).round, thisdur, ch, max((1+thisdur)**2-1, 0.5), false);
 		ch = 1 - ch;
 		dur = dur + thisdur;
 		thisdur.wait;
 	});
-	["4 done", dur].postln;
+	["4a done", dur].postln;
+
+
+	totaldur = totaldur + dur;
+	dur = 0;
+	while({dur < 10}, { // recapitauling style of opening, but with filterbank
+		thisdur = pattern.next;
+		thisdur.postln;
+		// ~additive.value(allfreqs, thisdur*4, false, thisdur.linexp( 926/7239, 1, 0.5, 6.5).round, thisdur, ch, max((1+thisdur)**2-1, 0.5), false);
+		~inOct.value(thisdur.linexp( 926/7239, 1, 2.5, 6.5).round,
+			octShift[ch], thisdur*1.25, ch);
+		s.sync;
+		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, octShift[ch]]);
+		ch = 1 - ch;
+		dur = dur + thisdur;
+		thisdur.wait;
+	});
+	["4b done", dur].postln;
 
 	totaldur = totaldur + dur;
 	dur = 0;
@@ -116,7 +135,7 @@ Routine({
 	"waiting 5 seconds for reverb".postln;
 	5.wait;
 
-	[fftInv[0], fftInv[1], fftInvLS, fftInvRS].do{arg i; i.free;};
+	[fftInv[0], fftInv[1], fftInvLS, fftInvRS, octShift[0], octShift[1]].do{arg i; i.free;};
 
 	"resources freed".postln;
 
