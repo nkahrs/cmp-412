@@ -28,7 +28,7 @@ SynthDef(\fftInv, {
 	Out.ar(outBus, IFFT(chain))
 }).load(s);
 
-~thebuf = Buffer.read(s, "C:/Users/nkahrs/Box Sync/Noah Kahrs/1b Autumn 2018/composition/Bob's Class/10 06 brake drum single hit mono.wav"); //"/Volumes/snd/users/nkahrs/2 Fall 2018/cmp-412.git/trunk/10 06 brake drum single hit mono.wav"); use after-comment bit on Wozzeck
+~thebuf = Buffer.read(s, "/Volumes/snd/users/nkahrs/2 Fall 2018/cmp-412.git/trunk/10 06 brake drum single hit mono.wav"); //"C:/Users/nkahrs/Box Sync/Noah Kahrs/1b Autumn 2018/composition/Bob's Class/10 06 brake drum single hit mono.wav"); //"/Volumes/snd/users/nkahrs/2 Fall 2018/cmp-412.git/trunk/10 06 brake drum single hit mono.wav"); use after-comment bit on Wozzeck
 s.sync;
 	~thebuf.postln;
 

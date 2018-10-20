@@ -19,7 +19,7 @@ Routine({
 	while({dur < 5}, { // 5 seconds just time-shifting
 		thisdur = pattern.next;
 		thisdur.postln;
-		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
+		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, (1+thisdur)**2, \outBus, ch]);
 		ch = 1 - ch;
 		dur = dur + thisdur;
 		thisdur.wait;
@@ -31,7 +31,7 @@ Routine({
 	while({dur < 5}, { // 5 seconds, introduce FFT inversion thing
 		thisdur = pattern.next;
 		thisdur.postln;
-		Synth(\bdPT, [\pitch, 1, \time, (1/6)/thisdur, \mul, 10*min((1+thisdur)**3-1,1),
+		Synth(\bdPT, [\pitch, 1, \time, (1/6)/thisdur, \mul, 10*min((1+thisdur)**3,1),
 		\outBus, fftInv[ch]]);
 		ch = 1 - ch;
 		dur = dur + thisdur;
@@ -48,7 +48,7 @@ Routine({
 			thispitch = 1/((0.25/thisdur).linexp((1/16),1,4,1).round);
 			[thisdur, thispitch].postln;
 			Synth(\bdPT, [\pitch, thispitch,
-			\time, 0.25/thisdur, \mul, (1+thisdur)**2-1, \outBus, ch]);
+			\time, 0.25/thisdur, \mul, (1+thisdur)**2, \outBus, ch]);
 			ch = 1 - ch;
 			dur = dur + thisdur;
 			thisdur.wait;
@@ -57,7 +57,7 @@ Routine({
 		thispitch = ((0.25/thisdur).linexp((1/16),1,4,1).round);
 		[thisdur, thispitch, "fft"].postln;
 		Synth(\bdPT, [\pitch, thispitch,
-		\time, 4*thisdur, \mul, (1+thisdur)**6-1, \outBus, fftInv[ch]]);
+		\time, 4*thisdur, \mul, (1+thisdur)**6, \outBus, fftInv[ch]]);
 		ch = 1 - ch;
 		dur = dur + (2*thisdur/3);
 		(2*thisdur/3).wait;
@@ -91,7 +91,7 @@ Routine({
 		thisdur = 1/2/(pattern.next);
 		Synth(\bdPTRev, [\pitch, thisdur, \time, thisdur, \mul, min(20,10**(1/thisdur)), \outBus, fftInv[ch]]);
 		ch = 1 - ch;
-		~additive.value(allfreqs, thisdur, true, nil, thisdur, fftInv[ch], 10**(2/thisdur), true);
+		~additive.value(allfreqs, thisdur, true, nil, thisdur, fftInv[ch], min(20,10**(1/thisdur)), true);
 		thisdur.postln.wait;
 		dur = dur + thisdur;
 	});
@@ -119,7 +119,7 @@ Routine({
 		~inOct.value(min(8,thisdur*8.round),
 			octShift[ch], thisdur*1.25, ch);
 		s.sync;
-		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, min((1+thisdur)**2-1, 10), \outBus, octShift[ch]]);
+		Synth(\bdPT, [\pitch, 1, \time, 0.25/thisdur, \mul, min((1+thisdur)**2, 10), \outBus, octShift[ch]]);
 		ch = 1 - ch;
 		thisdur = thisdur*1.5;
 		dur = dur + thisdur;
@@ -134,10 +134,10 @@ Routine({
 	s.sync;
 	{Out.ar(0, In.ar(tmp[0]) * EnvGen.kr(Env([0,1,0], [0.01,8], \sqr), doneAction:2))}.play;
 	{Out.ar(1, In.ar(tmp[0]) * EnvGen.kr(Env([0,1,0], [8, 0.01], \sqr), doneAction:2))}.play;
-	{Out.ar(1, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,0], [0.01,8], \sqr), doneAction:2))}.play;
-	{Out.ar(0, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,0], [8, 0.01], \sqr), doneAction:2))}.play;
-	~additive.value(allfreqs, 8, true, nil, 8, tmp[0], 2, true);
-	tmp[3] = Synth(\fftInv, [\inBus, tmp[2], \outBus, tmp[1]]);
+	{Out.ar(1, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,1,0], [0.01,7.5,0.5], \sqr), doneAction:2))}.play;
+	{Out.ar(0, In.ar(tmp[1]) * EnvGen.kr(Env([0,1,1,0], [0.5,7.5,0.01], \sqr), doneAction:2))}.play; s.sync;
+	~additive.value(allfreqs, 8, true, nil, 4, tmp[0], 2, true);
+	tmp[3] = Synth(\fftInv, [\inBus, tmp[2], \outBus, tmp[1]]); s.sync;
 	Synth(\bdPTRev, [\pitch, 8, \time, 1.148/8, \mul, 20,
 		\outBus, tmp[2]]);
 	8.wait;
@@ -164,22 +164,22 @@ Routine({
 			[[thisoct, thistime, thismul], tmp[6]].postln;
 
 			switch(tmp[6],
-				0, { // sound -> fftinv -> inoct (clear last "1")
+				0, { // sound -> fftinv -> inoct (clear last "1") -> out ch
 					tmp[5].free;
 					tmp[5] = nil;
 					~inOct.value(thisoct, tmp[0], 2*thisdur, ch); s.sync;
 					tmp[4] = Synth(\fftInv, [\inBus, tmp[1], \outBus, tmp[0]]); s.sync;
 					Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, 4**thismul, \outBus, tmp[1]]);
 				},
-				1, { // sound -> inoct -> fftinv
+				1, { // sound -> inoct -> fftinv -> out ch
 					tmp[4].free;
 					tmp[4] = nil;
 					tmp[5] = Synth(\fftInv, [\inBus, tmp[2], \outBus, ch]); s.sync;
 					~inOct.value(thisoct, tmp[3], 2*thisdur, tmp[2]); s.sync;
 					Synth(\bdPT, [\pitch, thistime, \time, thistime, \mul, 4**thismul, \outBus, tmp[3]]);
 				},
-				2, { // additive (clear last "0")
-					~additive.value(allfreqs, 2/thisdur, true, thisoct, nil, ch, 0.75**thismul, false)
+				2, { // additive (clear last "0") -> out ch
+					~additive.value(allfreqs, 2/thisdur, true, thisoct, nil, ch, 1.5**thismul, false)
 					// args for ~additive: freqs, dur, invert, octave, transpose, outBus, mul, reverse;
 				}
 			);
