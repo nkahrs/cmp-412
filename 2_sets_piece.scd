@@ -3,6 +3,11 @@ Routine({
 	var dur, pattern, ch, thisdur, allfreqs, totaldur, tmp;
 	var fftInv, fftInvLS, fftInvRS, octShift;
 
+	// begin just-for-recording stuff
+	s.prepareForRecord; s.sync;
+	s.record; s.sync;
+	// end just-for-recording stuff
+
 	allfreqs = [926,2305,2499,2645,3239,3855,4220,4676,4757,5929,5995,6079,6153,6226,7239]; // brake drum spectrum
 	pattern = Pseq(2*926/allfreqs.reverse, inf).asStream; // recurring pattern to draw durations etc from
 	dur = 0; // duration elapsed
@@ -203,6 +208,9 @@ Routine({
 
 	[fftInv[0], fftInv[1], fftInvLS, fftInvRS, octShift[0], octShift[1]].do{arg i; i.free;};
 	6.do{arg i; if(tmp[i]==nil, {}, {tmp[i].free});};
+	// stop recording
+	s.stopRecording; s.sync;
+	// end recording-specific
 	"resources freed".postln;
 
 
