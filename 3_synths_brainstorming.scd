@@ -19,17 +19,17 @@ max(1, 2)
 (
 SynthDef(\lowmix,
 	{
-		arg freq, dur, amp, ramp;
+		arg freq, dur, amp, ramp, out;
 
 		var balance, sound, env, rampdur;
 
-		balance = min(freq/50, 1);
+		balance = min(freq/128, 1);
 		sound = (balance*SinOsc.ar(freq, 0, amp))+((1-balance)*LFSaw.ar(freq, 0, amp));
 		rampdur = dur*ramp/2;
 		env = EnvGen.kr(Env([0, 1, 1, 0], [rampdur, (dur - (2 * rampdur)), rampdur]), doneAction:2);
 		sound = sound * env;
 
-		Out.ar(0, sound)
+		Out.ar(out, sound)
 }).load(s)
 )
 
@@ -52,7 +52,7 @@ Routine({
 )
 
 // test with specific notes, 11/27
-Synth(\lowmix, [\freq, 12.midicps, \dur, 4, \amp, 10, \ramp, 0.01])
+Synth(\lowmix, [\freq, 24.midicps, \dur, 4, \amp, 10, \ramp, 0.01])
 
 {SinOsc.ar}.play
 
@@ -62,7 +62,7 @@ Synth(\lowmix, [\freq, 12.midicps, \dur, 4, \amp, 10, \ramp, 0.01])
 (
 SynthDef(\saw,
 	{
-		arg freq, dur, amp, ramp;
+		arg freq, dur, amp, ramp, out;
 
 		var balance, sound, env, rampdur;
 
@@ -73,9 +73,9 @@ SynthDef(\saw,
 		env = EnvGen.kr(Env([0, 1, 1, 0], [rampdur, (dur - (2 * rampdur)), rampdur]), doneAction:2);
 		sound = sound * env;
 
-		Out.ar(0, sound)
+		Out.ar(out, sound)
 }).load(s)
 )
 
-Synth(\saw, [\freq, 36.midicps, \dur, 4, \amp, 1, \ramp, 0.01])
+Synth(\saw, [\freq, 24.midicps, \dur, 4, \amp, 1, \ramp, 0.01])
 

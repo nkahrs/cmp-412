@@ -33,11 +33,12 @@ Routine({
 	12.do{
 		arg j;
 		var i;
-		i = [/*~rz[j], */~rqz[j]];
+		i = [~z[j], ~rqz[j]];
 		i.postln;
 		// i = i * 4;
-		// [i, i.cpsmidi, i.cpsmidi.round % 12].postln;
-		{LFSaw.ar(i)*EnvGen.kr(Env())}.play;
+		[i, i.cpsmidi, i.cpsmidi.round % 12].postln;
+		Synth(\lowmix, [\freq, i[0], \dur, 2, \amp, 1, \ramp, 1, \out, 0]);
+		Synth(\lowmix, [\freq, i[1], \dur, 2, \amp, 1, \ramp, 1, \out, 1]);
 		1.wait;
 }}).play;
 )
