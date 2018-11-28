@@ -52,4 +52,9 @@ Routine({
 )
 
 // test with specific notes, 11/27
-Synth(\lowmix, [\freq, 60.midicps, \dur, 4, \amp, 0.1, \ramp, 0.5])
+Synth(\lowmix, [\freq, 12.midicps, \dur, 4, \amp, 10, \ramp, 0.01])
+
+{SinOsc.ar}.play
+
+1/[1,2].reverse
+
