@@ -38,14 +38,18 @@ Synth(\lowmix, [\freq, 15, \dur, 4, \amp, 0.1, \ramp, 0.01])
 // now, some midi tests...
 (
 Routine({
-	[0, 7, 4, 10, 6, 8, 1, 3, 11, 5, 2, 9].do{
+	[0, 7, 4, 10, 6, 1, 8, 3, 11, 5, 2, 9].do{
 		arg i;
 		var freq, dur;
-		freq = i.midicps / 3;
-		dur = 10/freq;
-		[i, freq, 10/freq].postln;
-		Synth(\lowmix, [\freq, i.midicps/3, \dur, dur, \amp, 0.1, \ramp, 0.1]);
+		freq = i.midicps *8;
+		dur = 200/freq;
+		dur = 1;
+		[i, freq, 5/freq].postln;
+		Synth(\lowmix, [\freq, freq, \dur, dur, \amp, 0.1, \ramp, 0.1]);
 		dur.wait
 	}
 }).play;
 )
+
+// test with specific notes, 11/27
+Synth(\lowmix, [\freq, 60.midicps, \dur, 4, \amp, 0.1, \ramp, 0.5])

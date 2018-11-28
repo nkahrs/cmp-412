@@ -22,4 +22,46 @@ R = (128/(5.5*5.5*(2**(1/4))))**(1/3) ~ 1.527 ~ 7.325 cents
 so, T0P=RT9IP
 
 
-[0, 7, 4, 10, 6, 8, 1, 3, 11, 5, 2, 9]
+[0, 7, 4, 10, 6, 1, 8, 3, 11, 5, 2, 9]
+
+
+
+11/27: how to structure the piece?
+registral alignments ascending
+C  G  E  Bb F#
+C# G# D# B  F
+D  A ...
+octaves
+1  1  2  2  3
+
+
+row and its retrograde at the same time alignments, same intervals
+
+"positions to be assigned durations"
+C  G  E  Bb F#
+2  3  5  7  11
+A  D  F  B  D#		maybe articulate by one dyad in a time, but in separate registers?
+33 26 17 11 3
+
+C# G#  D#  B   F
+93 140 210 330 462
+G# C#  F#  Bb  E
+44 37  30  22  16
+
+D   A ...
+770 1155
+G   C ...
+7   0
+
+or, register positions.
+in midi,
+[0, 7, 16, 22, 30,	1, 8, 15, 23, 29,	38, 45]
+in ratios,
+X = [1, 3/2, 5/2, 7/2, 11/2, 33/32]
+(C0*X) ++ (A?*(1/X.reverse))
+(defined so that C#-G# is close to 3/2)
+
+(last element of the second part actually has to be massively octave-shifted: [1, 3/2, 5/2, 7/2, 11/2,	11/2*3/2])
+
+see "assembling row"
+C4 = 60, C3 = 48, C2 = 36, C1 = 24
