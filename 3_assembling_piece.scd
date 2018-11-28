@@ -41,16 +41,22 @@
 // full first section: pentachords and last dyad, 5 seconds long + 1 second rest
 (
 Routine({
+	var thispenta;
+
+	thispenta = ~z[(0..4)];
 	"first pentachord".postln;
 	~playdurationscheme.value(
-		~z[(0..4)],
-		(1/~z[(0..4)]).normalizeSum*5,
+		thispenta,
+		(1/thispenta).normalizeSum*5,
 		0);
+	thispenta = ~rqz[(0..4)];
 	~playdurationscheme.value(
-		~rqz[(0..4)],
-		(~rqz[(0..4)].cpsmidi-33).normalizeSum*5,
+		thispenta,
+		(thispenta.cpsmidi-33).normalizeSum*5,
 		1);
 	6.wait;
+
+
 	"second pentachord".postln;
 	~playdurationscheme.value(
 		~z[(5..9)],
@@ -73,6 +79,45 @@ Routine({
 		1);
 	6.wait;
 	"end".postln;
+//}).play;
+
+
+// also add the two row forms that the last two notes kinda sandwich. (after D-A, we have F#-C-G#-D#-A#, then F-Db-G-E-A. And vice versa. This'd add another 12 seconds.)
+
+//Routine({
+	"first pentachord".postln;
+	thispenta = ~z[(2..6)];
+	thispenta = thispenta * (2.midiratio);
+	~playdurationscheme.value(
+		thispenta,
+		(1/thispenta).normalizeSum*5,
+		0);
+
+	thispenta = ~rqz[(2..6)];
+	~playdurationscheme.value(
+		thispenta,
+		(thispenta.cpsmidi-44).normalizeSum*5,
+		1);
+
+	6.wait;
+
+	"second pentachord".postln;
+	thispenta = ~z[(7..11)];
+	thispenta = thispenta * (2.midiratio);
+	~playdurationscheme.value(
+		thispenta,
+		(1/thispenta).normalizeSum*5,
+		0);
+
+	thispenta = ~rqz[(7..11)];
+	~playdurationscheme.value(
+		thispenta,
+		(thispenta.cpsmidi-22).normalizeSum*5,
+		1);
+
+	6.wait;
+	"end".postln;
+
 }).play;
 )
 
@@ -118,23 +163,25 @@ Routine({
 
 		~playdurationscheme.value(
 			2*first,
-			(1/first).normalizeSum,
+			(1/first).normalizeSum*2,
 			0, 1/4);
 		// two of the same an octave apart. I should use different registral forms of the row (one by pentachords as in previous section, then one by hexachords as for next section).
 		~playdurationscheme.value(
 			first,
-			(1/first).normalizeSum,
+			(1/first).normalizeSum*2,
 			0, 1/8);
 		// need to octave-shift both series to near the critical band, and standardize pitch-class baseline for second scheme
-		1.wait;
+		// 1.wait;
 		~playdurationscheme.value(
 			2*second,
-			[1,1]/2,
+			[1,1],
 			1, 1/4);
 		~playdurationscheme.value(
 			4*second,
-			[1,1]/2,
+			[1,1],
 			1, 1/16);
-		1.wait;
+		2.wait;
 }}).play;
 )
+
+// 3rd part: use the two-hexachord format, one row form after another, two different intonation schemes simultaneously.
