@@ -23,7 +23,7 @@ SynthDef(\lowmix,
 
 		var balance, sound, env, rampdur;
 
-		balance = min(freq/128, 1);
+		balance = min(freq/64, 1);
 		sound = (balance.sqrt*SinOsc.ar(freq, 0, amp))+((((1-balance)*3/2)**2)*LFSaw.ar(freq, 0, amp));
 		rampdur = dur*ramp/2;
 		env = EnvGen.kr(Env([0, 1, 1, 0], [rampdur, (dur - (2 * rampdur)), rampdur]), doneAction:2);
