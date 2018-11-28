@@ -49,7 +49,7 @@ Routine({
 	~playdurationscheme.value(
 		~rqz[(0..4)],
 		(~rqz[(0..4)].cpsmidi-33).normalizeSum*5,
-		0);
+		1);
 	6.wait;
 	"second pentachord".postln;
 	~playdurationscheme.value(
@@ -60,7 +60,7 @@ Routine({
 
 		~rqz[(5..9)],
 		(~rqz[(5..9)].cpsmidi-36).normalizeSum*5,
-		0);
+		1);
 	6.wait;
 	"last two notes".postln;
 	~playdurationscheme.value(
@@ -70,7 +70,7 @@ Routine({
 	~playdurationscheme.value(
 		~rqz[(10..11)],
 		(~rqz[(10..11)].cpsmidi-19).normalizeSum*5,
-		0);
+		1);
 	6.wait;
 	"end".postln;
 }).play;
@@ -130,11 +130,11 @@ Routine({
 		~playdurationscheme.value(
 			2*second,
 			[1,1]/2,
-			0, 1/4);
+			1, 1/4);
 		~playdurationscheme.value(
 			4*second,
 			[1,1]/2,
-			0, 1/16);
+			1, 1/16);
 		1.wait;
 }}).play;
 )
