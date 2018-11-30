@@ -135,8 +135,9 @@ Routine({
 
 ~miditorhythm = {
 	arg midi;
-	["miditorhythm",midi].postln;
-	(midi + 12 - midi[0]).postln;
+	var toreturn;
+	toreturn = (midi + 12 - midi[0]);
+	toreturn = toreturn.normalizeSum*2;
 }
 )
 
@@ -186,7 +187,6 @@ Routine({
 
 		first = ~pitchtolow.value(~z[(i..i+1)]); // transpose so that the second one is in the [0,12) midi range
 		second = ~pitchtolow.value(~rqz[(i..i+1)]);
-		["second",second].postln;
 
 		~playdurationscheme.value(
 			2*first,
@@ -205,12 +205,23 @@ Routine({
 			1, 1/4);
 		~playdurationscheme.value(
 			4*second,
-			[1,1], //~miditorhythm.value(second),
+			~miditorhythm.value(second),
 			1, 1/16);
 		2.wait;
 }}).play;
 )
 
-~miditorhythm.value([ 13.75, 9.177023997419 ])
 
 // 3rd part: use the two-hexachord format, one row form after another, two different intonation schemes simultaneously.
+
+~z[5] = ~z[5] * 8;
+~z[(0..5)] // first hexachord
+~z[(6..11)] // second hexachord
+
+/* from here, do as follows when less tired:
+first hexachord like the first pentachord in the first section, but with 9 seconds
+both "equivalent" rows simultaneously.
+
+then second hexachord...
+when at last two notes, trigger same for same row form, but freqs *(9/8)
+*/
