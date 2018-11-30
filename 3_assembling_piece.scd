@@ -189,7 +189,7 @@ Routine({
 		second = ~pitchtolow.value(~rqz[(i..i+1)]);
 
 		~playdurationscheme.value(
-			2*first,
+			0.5*first,
 			(1/first).normalizeSum*2,
 			0, 1/4);
 		// two of the same an octave apart. I should use different registral forms of the row (one by pentachords as in previous section, then one by hexachords as for next section).
@@ -217,6 +217,8 @@ Routine({
 ~z[5] = ~z[5] * 8;
 ~z[(0..5)] // first hexachord
 ~z[(6..11)] // second hexachord
+// to check...
+~z.cpsmidi.round
 
 /* from here, do as follows when less tired:
 first hexachord like the first pentachord in the first section, but with 9 seconds
