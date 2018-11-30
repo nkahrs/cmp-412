@@ -86,33 +86,35 @@ Routine({
 
 //Routine({
 	"first pentachord".postln;
-	thispenta = ~z[(2..6)];
-	thispenta = thispenta * (2.midiratio);
+	thispenta = ~z[(2..6)] * (2.midiratio);
+	thispenta.postln;
 	~playdurationscheme.value(
 		thispenta,
 		(1/thispenta).normalizeSum*5,
 		0);
 
-	thispenta = ~rqz[(2..6)];
+	thispenta = ~rqz[(2..6)]*(2.midiratio);
+	thispenta.postln;
 	~playdurationscheme.value(
 		thispenta,
-		(thispenta.cpsmidi-44).normalizeSum*5,
+		(thispenta.cpsmidi-46).normalizeSum*5,
 		1);
 
 	6.wait;
 
 	"second pentachord".postln;
-	thispenta = ~z[(7..11)];
-	thispenta = thispenta * (2.midiratio);
+	thispenta = ~z[(7..11)] * (2.midiratio);
+	thispenta.postln;
 	~playdurationscheme.value(
 		thispenta,
 		(1/thispenta).normalizeSum*5,
 		0);
 
-	thispenta = ~rqz[(7..11)];
+	thispenta = ~rqz[(7..11)] * (2.midiratio);
+	thispenta.postln;
 	~playdurationscheme.value(
 		thispenta,
-		(thispenta.cpsmidi-22).normalizeSum*5,
+		(thispenta.cpsmidi-24).normalizeSum*5,
 		1);
 
 	6.wait;
@@ -129,21 +131,45 @@ Routine({
 	xs = xs.cpsmidi;
 	xs = xs-(12*((xs[1]/12).floor));
 	xs.midicps
+};
+
+~miditorhythm = {
+	arg midi;
+	["miditorhythm",midi].postln;
+	(midi + 12 - midi[0]).postln;
 }
 )
 
 (var asdf = (5..6); ~pitchtolow.value(~z[asdf])/~z[asdf])
 
 
+// need a curve that sends, say, (1.2, .8) to (1,1), but (1.6, 0.4) to (1.9, 0.1)
+
+// testing values
 (
 11.do{
 	arg i;
+	var blah;
 	i.postln;
 
-	~pitchtolow.value(~z[(i..i+1)]).postln; // transpose so that the second one is in the [0,12) midi range
-	~pitchtolow.value(~rqz[(i..i+1)]).postln;
+	// pitches for JI
+	blah = ~pitchtolow.value(~z[(i..i+1)]);// transpose so that the second one is in the [0,12) midi range
+	blah.postln;
+	// rhythms for JI
+	blah = ((1/blah).normalizeSum*2);
+	blah.postln;
+
+	// pitches for ET
+	blah = ~pitchtolow.value(~rqz[(i..i+1)]);
+	blah.postln;
+	// rhythms for ET
+	blah = blah.cpsmidi;
+	// blah.postln;
+	blah = blah + (12 - blah[0]);
+	(blah.normalizeSum*2).postln;
 }
 )
+
 
 40-(12*(40/12).floor)
 
@@ -160,6 +186,7 @@ Routine({
 
 		first = ~pitchtolow.value(~z[(i..i+1)]); // transpose so that the second one is in the [0,12) midi range
 		second = ~pitchtolow.value(~rqz[(i..i+1)]);
+		["second",second].postln;
 
 		~playdurationscheme.value(
 			2*first,
@@ -174,14 +201,16 @@ Routine({
 		// 1.wait;
 		~playdurationscheme.value(
 			2*second,
-			[1,1],
+			~miditorhythm.value(second),
 			1, 1/4);
 		~playdurationscheme.value(
 			4*second,
-			[1,1],
+			[1,1], //~miditorhythm.value(second),
 			1, 1/16);
 		2.wait;
 }}).play;
 )
+
+~miditorhythm.value([ 13.75, 9.177023997419 ])
 
 // 3rd part: use the two-hexachord format, one row form after another, two different intonation schemes simultaneously.
