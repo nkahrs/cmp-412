@@ -214,11 +214,12 @@ Routine({
 
 // 3rd part: use the two-hexachord format, one row form after another, two different intonation schemes simultaneously.
 
-~z[5] = ~z[5] * 8;
-~z[(0..5)] // first hexachord
-~z[(6..11)] // second hexachord
+~z3 = ~z
+~z3[5] = ~z[5] * 8;
+~z3[(0..5)] // first hexachord
+~z3[(6..11)] // second hexachord
 // to check...
-~z.cpsmidi.round
+~z3.cpsmidi.round
 
 /* from here, do as follows when less tired:
 first hexachord like the first pentachord in the first section, but with 9 seconds
@@ -227,3 +228,96 @@ both "equivalent" rows simultaneously.
 then second hexachord...
 when at last two notes, trigger same for same row form, but freqs *(9/8)
 */
+
+~z.cpsmidi.round
+
+(
+Routine({
+	var thishexa, t2z3;
+	t2z3 = ~z3*9/8;
+
+	thishexa = ~z3[(0..5)];
+	["first hexachord", thishexa].postln;
+	~playdurationscheme.value(
+		thishexa,
+		(1/thishexa).normalizeSum*6,
+	0);
+	thishexa = thishexa.cpsmidi.round.midicps;
+	~playdurationscheme.value(
+		thishexa,
+		(thishexa.cpsmidi-13).normalizeSum*6,
+	1);
+	7.wait;
+
+	thishexa = ~z3[(6..9)]; // 10 and 11 separately
+	["second hexachord", thishexa].postln;
+	~playdurationscheme.value(
+		thishexa,
+		(1/thishexa).normalizeSum*4,
+		0);
+	thishexa = thishexa.cpsmidi.round.midicps;
+	~playdurationscheme.value(
+		thishexa,
+		(thishexa.cpsmidi-21).normalizeSum*4,
+		1);
+	5.wait;
+
+	thishexa = ~z3[(10..11)]; // D-A
+	"DA".postln;
+	~playdurationscheme.value(
+		thishexa,
+		(1/thishexa).normalizeSum*2,
+		0);
+	thishexa = thishexa.cpsmidi.round.midicps;
+	~playdurationscheme.value(
+		thishexa,
+		(thishexa.cpsmidi-21).normalizeSum*2,
+		1);
+	thishexa = t2z3[(0..1)]; // more D-A
+	~playdurationscheme.value(
+		thishexa,
+		(1/thishexa).normalizeSum*2,
+		0);
+	thishexa = thishexa.cpsmidi.round.midicps;
+	~playdurationscheme.value(
+		thishexa,
+		(thishexa.cpsmidi-21).normalizeSum*2,
+		1);
+	3.wait;
+
+	thishexa = t2z3[(2..5)]; // rest of first hexachord, T2P
+	["first hexachord", thishexa].postln;
+	~playdurationscheme.value(
+		thishexa,
+		(1/thishexa).normalizeSum*4,
+		0);
+	thishexa = thishexa.cpsmidi.round.midicps;
+	~playdurationscheme.value(
+		thishexa,
+		(thishexa.cpsmidi-21).normalizeSum*4,
+		1);
+	5.wait;
+
+	thishexa = t2z3[(6..11)]; // all of second hexachord
+	["second hexachord", thishexa].postln;
+	~playdurationscheme.value(
+		thishexa,
+		(1/thishexa).normalizeSum*6,
+	0);
+	thishexa = thishexa.cpsmidi.round.midicps;
+	~playdurationscheme.value(
+		thishexa,
+		(thishexa.cpsmidi-13).normalizeSum*6,
+	1);
+	7.wait;
+
+}).play
+)
+
+[ 53.333333333333, 80, 125.71428571429, 176, 293.33333333333, 440 ].cpsmidi.round
+69-48
+
+
+s.prepareForRecord
+s.record
+s.stopRecording
