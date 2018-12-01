@@ -216,9 +216,11 @@ Routine({
 
 
 // 3rd part: use the two-hexachord format, one row form after another, two different intonation schemes simultaneously.
+
 (
 ~z3 = ~z;
-~z3[5] = ~z[5] * 8;
+~z3[5] = ~z3[5] * 8;
+~z3 = ~z3 / 2;
 )
 ~z3[(0..5)] // first hexachord
 ~z3[(6..11)] // second hexachord
@@ -238,7 +240,7 @@ when at last two notes, trigger same for same row form, but freqs *(9/8)
 (
 Routine({
 	var thishexa, t2z3;
-	t2z3 = ~z3*9/16;
+	t2z3 = ~z3*9/8;
 
 	thishexa = ~z3[(0..5)];
 	["first hexachord", thishexa].postln;
