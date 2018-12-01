@@ -17,6 +17,9 @@
 (~rqz[(10..11)].cpsmidi-19).normalizeSum*5
 
 
+// nb run this first if playing back in mono
+{In.ar(1)}.play
+
 (
 ~playdurationscheme = {
 	arg freqs1, durs1, outbus, amp;
@@ -194,7 +197,7 @@ Routine({
 			0, 1/4);
 		// two of the same an octave apart. I should use different registral forms of the row (one by pentachords as in previous section, then one by hexachords as for next section).
 		~playdurationscheme.value(
-			first,
+			0.25*first,
 			(1/first).normalizeSum*2,
 			0, 1/8);
 		// need to octave-shift both series to near the critical band, and standardize pitch-class baseline for second scheme
@@ -206,16 +209,17 @@ Routine({
 		~playdurationscheme.value(
 			4*second,
 			~miditorhythm.value(second),
-			1, 1/16);
+			1, 1/8);
 		2.wait;
 }}).play;
 )
 
 
 // 3rd part: use the two-hexachord format, one row form after another, two different intonation schemes simultaneously.
-
-~z3 = ~z
+(
+~z3 = ~z;
 ~z3[5] = ~z[5] * 8;
+)
 ~z3[(0..5)] // first hexachord
 ~z3[(6..11)] // second hexachord
 // to check...
@@ -234,7 +238,7 @@ when at last two notes, trigger same for same row form, but freqs *(9/8)
 (
 Routine({
 	var thishexa, t2z3;
-	t2z3 = ~z3*9/8;
+	t2z3 = ~z3*9/16;
 
 	thishexa = ~z3[(0..5)];
 	["first hexachord", thishexa].postln;
@@ -245,7 +249,7 @@ Routine({
 	thishexa = thishexa.cpsmidi.round.midicps;
 	~playdurationscheme.value(
 		thishexa,
-		(thishexa.cpsmidi-13).normalizeSum*6,
+		(thishexa.cpsmidi-1).normalizeSum*6,
 	1);
 	7.wait;
 
@@ -253,50 +257,50 @@ Routine({
 	["second hexachord", thishexa].postln;
 	~playdurationscheme.value(
 		thishexa,
-		(1/thishexa).normalizeSum*4,
+		(1/thishexa).normalizeSum*5,
 		0);
 	thishexa = thishexa.cpsmidi.round.midicps;
 	~playdurationscheme.value(
 		thishexa,
-		(thishexa.cpsmidi-21).normalizeSum*4,
+		(thishexa.cpsmidi-9).normalizeSum*5,
 		1);
-	5.wait;
+	6.wait;
 
 	thishexa = ~z3[(10..11)]; // D-A
 	"DA".postln;
 	~playdurationscheme.value(
 		thishexa,
-		(1/thishexa).normalizeSum*2,
+		(1/thishexa).normalizeSum*6,
 		0);
 	thishexa = thishexa.cpsmidi.round.midicps;
 	~playdurationscheme.value(
 		thishexa,
-		(thishexa.cpsmidi-21).normalizeSum*2,
+		(thishexa.cpsmidi-9).normalizeSum*2,
 		1);
 	thishexa = t2z3[(0..1)]; // more D-A
 	~playdurationscheme.value(
 		thishexa,
-		(1/thishexa).normalizeSum*2,
+		(1/thishexa).normalizeSum*6,
 		0);
 	thishexa = thishexa.cpsmidi.round.midicps;
 	~playdurationscheme.value(
 		thishexa,
-		(thishexa.cpsmidi-21).normalizeSum*2,
+		(thishexa.cpsmidi-9).normalizeSum*6,
 		1);
-	3.wait;
+	7.wait;
 
 	thishexa = t2z3[(2..5)]; // rest of first hexachord, T2P
 	["first hexachord", thishexa].postln;
 	~playdurationscheme.value(
 		thishexa,
-		(1/thishexa).normalizeSum*4,
+		(1/thishexa).normalizeSum*5,
 		0);
 	thishexa = thishexa.cpsmidi.round.midicps;
 	~playdurationscheme.value(
 		thishexa,
-		(thishexa.cpsmidi-21).normalizeSum*4,
+		(thishexa.cpsmidi-9).normalizeSum*5,
 		1);
-	5.wait;
+	6.wait;
 
 	thishexa = t2z3[(6..11)]; // all of second hexachord
 	["second hexachord", thishexa].postln;
@@ -307,7 +311,7 @@ Routine({
 	thishexa = thishexa.cpsmidi.round.midicps;
 	~playdurationscheme.value(
 		thishexa,
-		(thishexa.cpsmidi-13).normalizeSum*6,
+		(thishexa.cpsmidi-1).normalizeSum*6,
 	1);
 	7.wait;
 
@@ -321,3 +325,5 @@ Routine({
 s.prepareForRecord
 s.record
 s.stopRecording
+
+// this has been mixed to sound good on a subwoofer. Who knows how it'll sound on real speakers.

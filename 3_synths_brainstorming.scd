@@ -23,6 +23,8 @@ SynthDef(\lowmix,
 
 		var balance, sound, env, rampdur;
 
+		amp = amp / 2; // to make things work in mono
+
 		balance = min(freq/64, 1);
 		sound = (balance.sqrt*SinOsc.ar(freq, 0, amp))+((((1-balance)*3/2)**2)*LFSaw.ar(freq, 0, amp));
 		rampdur = dur*ramp/2;
